@@ -1,6 +1,5 @@
-// myApp\src\screens\PlanScreen.js
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Modal, TextInput, Button } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Modal, TextInput } from 'react-native';
 
 const exercises = [
   { name: 'Press militar', sets: 10, reps: 8, weight: 15 },
@@ -11,13 +10,21 @@ const exercises = [
 ];
 
 export default function PlanScreen() {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [newExercise, setNewExercise] = useState({ name: '', sets: '', reps: '', weight: '' });
+  const [addModalVisible, setAddModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [newExercise, setNewExercise] = useState('');
+  const [selectedExercise, setSelectedExercise] = useState({ name: '', sets: '', reps: '', weight: '' });
 
   const handleAddExercise = () => {
-    // Aquí puedes agregar lógica para añadir el nuevo ejercicio a la lista
-    console.log(newExercise);
-    setModalVisible(false);
+    exercises.push({ name: newExercise, sets: '', reps: '', weight: '' });
+    setNewExercise('');
+    setAddModalVisible(false);
+  };
+
+  const handleEditExercise = () => {
+    // Aquí puedes agregar lógica para editar el ejercicio seleccionado
+    console.log(selectedExercise);
+    setEditModalVisible(false);
   };
 
   return (
@@ -25,7 +32,7 @@ export default function PlanScreen() {
       <ScrollView style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.breadcrumb}>Pecho &gt; Ejercicios</Text>
-          <TouchableOpacity onPress={() => setModalVisible(true)}>
+          <TouchableOpacity onPress={() => setAddModalVisible(true)}>
             <View style={styles.addButton}>
               <Text style={styles.addButtonText}>+</Text>
             </View>
@@ -33,74 +40,102 @@ export default function PlanScreen() {
         </View>
         <Text style={styles.title}>Ejercicios</Text>
         {exercises.map((exercise, index) => (
-          <View key={index} style={styles.card}>
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>{exercise.name}</Text>
-              <View style={styles.cardDetails}>
-                <Text style={styles.detailText}>S</Text>
-                <Text style={styles.detailText}>{exercise.sets}</Text>
-                <Text style={styles.detailText}>RP</Text>
-                <Text style={styles.detailText}>{exercise.reps}</Text>
-                <Text style={styles.detailText}>Kg</Text>
-                <Text style={styles.detailText}>{exercise.weight}</Text>
+          <TouchableOpacity key={index} onPress={() => { setSelectedExercise(exercise); setEditModalVisible(true); }}>
+            <View style={styles.card}>
+              <View style={styles.cardContent}>
+                <Text style={styles.cardTitle}>{exercise.name}</Text>
+                <View style={styles.cardDetails}>
+                  <Text style={styles.detailText}>S</Text>
+                  <Text style={styles.detailText}>{exercise.sets}</Text>
+                  <Text style={styles.detailText}>RP</Text>
+                  <Text style={styles.detailText}>{exercise.reps}</Text>
+                  <Text style={styles.detailText}>Kg</Text>
+                  <Text style={styles.detailText}>{exercise.weight}</Text>
+                </View>
               </View>
             </View>
-          </View>
+          </TouchableOpacity>
         ))}
       </ScrollView>
 
       <Modal
         animationType="slide"
         transparent={true}
-        visible={modalVisible}
+        visible={addModalVisible}
         onRequestClose={() => {
-          setModalVisible(!modalVisible);
+          setAddModalVisible(!addModalVisible);
         }}
       >
-        <View style={styles.centeredView}>
+        <View style={styles.modalContainer}>
           <View style={styles.modalView}>
-            <Text style={styles.modalTitle}>Press militar</Text>
             <TouchableOpacity
               style={styles.closeButton}
-              onPress={() => setModalVisible(!modalVisible)}
+              onPress={() => setAddModalVisible(!addModalVisible)}
             >
               <Text style={styles.closeButtonText}>×</Text>
             </TouchableOpacity>
-            <View style={styles.inputContainer}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>kg</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder=""
-                  placeholderTextColor="#ccc"
-                  keyboardType="numeric"
-                  onChangeText={(text) => setNewExercise({ ...newExercise, weight: text })}
-                />
-              </View>
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Repeticiones</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder=""
-                  placeholderTextColor="#ccc"
-                  keyboardType="numeric"
-                  onChangeText={(text) => setNewExercise({ ...newExercise, reps: text })}
-                />
-              </View>
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Serie</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder=""
-                  placeholderTextColor="#ccc"
-                  keyboardType="numeric"
-                  onChangeText={(text) => setNewExercise({ ...newExercise, sets: text })}
-                />
-              </View>
-            </View>
+            <Text style={styles.modalTitle}>Nuevo Ejercicio</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Nombre"
+              placeholderTextColor="#999"
+              value={newExercise}
+              onChangeText={(text) => setNewExercise(text)}
+            />
             <TouchableOpacity
               style={styles.saveButton}
               onPress={handleAddExercise}
+            >
+              <Text style={styles.saveButtonText}>Guardar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={editModalVisible}
+        onRequestClose={() => {
+          setEditModalVisible(!editModalVisible);
+        }}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalView}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setEditModalVisible(!editModalVisible)}
+            >
+              <Text style={styles.closeButtonText}>×</Text>
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>{selectedExercise.name}</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Kg"
+              placeholderTextColor="#999"
+              keyboardType="numeric"
+              value={selectedExercise.weight.toString()}
+              onChangeText={(text) => setSelectedExercise({ ...selectedExercise, weight: text })}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Repeticiones"
+              placeholderTextColor="#999"
+              keyboardType="numeric"
+              value={selectedExercise.reps.toString()}
+              onChangeText={(text) => setSelectedExercise({ ...selectedExercise, reps: text })}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Series"
+              placeholderTextColor="#999"
+              keyboardType="numeric"
+              value={selectedExercise.sets.toString()}
+              onChangeText={(text) => setSelectedExercise({ ...selectedExercise, sets: text })}
+            />
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={handleEditExercise}
             >
               <Text style={styles.saveButtonText}>Guardar</Text>
             </TouchableOpacity>
@@ -135,16 +170,16 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   addButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: '#d9534f',
+    backgroundColor: '#A0522D', // Color de fondo del botón de añadir similar al de la imagen
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
   addButtonText: {
-    color: '#fff',
     fontSize: 24,
+    color: 'white', // Color del texto del botón de añadir
   },
   card: {
     backgroundColor: '#2a2a2a',
@@ -168,75 +203,54 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#fff',
   },
-  centeredView: {
+  modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 22,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo oscurecido
   },
   modalView: {
-    width: 300,
-    margin: 20,
-    backgroundColor: '#2a2a2a',
-    borderRadius: 20,
-    padding: 35,
+    width: '80%',
+    backgroundColor: '#333',
+    borderRadius: 10,
+    padding: 20,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  modalTitle: {
-    fontSize: 20,
-    color: '#fff',
-    marginBottom: 15,
-    textAlign: 'center',
+    position: 'relative',
   },
   closeButton: {
     position: 'absolute',
     top: 10,
     right: 10,
+    backgroundColor: 'transparent',
   },
   closeButtonText: {
-    color: '#fff',
-    fontSize: 24,
+    fontSize: 15,
+    color: 'white',
   },
-  inputContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    marginBottom: 20,
-  },
-  inputGroup: {
-    alignItems: 'center',
-  },
-  inputLabel: {
-    color: '#fff',
-    marginBottom: 5,
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 15,
   },
   input: {
-    width: 60,
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    color: '#fff',
-    textAlign: 'center',
-    padding: 5,
-  },
-  saveButton: {
-    backgroundColor: '#FC8760',
+    width: '100%',
+    backgroundColor: '#555',
     borderRadius: 5,
     padding: 10,
+    color: 'white',
+    marginVertical: 5,
+  },
+  saveButton: {
+    backgroundColor: '#FF7F50',
+    borderRadius: 5,
+    padding: 10,
+    marginTop: 15,
     width: '100%',
     alignItems: 'center',
   },
   saveButtonText: {
-    color: '#fff',
-    fontSize: 16,
+    color: 'black',
+    fontWeight: 'bold',
   },
 });
