@@ -19,7 +19,7 @@ function HomeStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen
         name="Home index"
-        component={loginScreen}
+        component={HomeScreen}
       />
       <Stack.Screen name="Statistics" component={StatisticsScreen} />
     </Stack.Navigator>

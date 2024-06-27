@@ -39,10 +39,10 @@ export default function HomeScreen({ navigation }) {
             <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
               <Text style={styles.closeButtonText}>X</Text>
             </TouchableOpacity>
-            <Text style={styles.modalTitle}>Nuevo ejercicio</Text>
+            <Text style={styles.modalTitle}>Nuevo entrenamiento</Text>
             <TextInput style={styles.input} placeholder="Nombre" placeholderTextColor="#999" keyboardType="default" />
             <TouchableOpacity style={styles.saveButton} onPress={() => setModalVisible(false)}>
-              <Text style={styles.saveButtonText}>guardar</Text>
+              <Text style={styles.saveButtonText}>Guardar</Text>
             </TouchableOpacity>
           </View>
         </View>

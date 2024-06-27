@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, SafeAreaView, StyleSheet, Text, TouchableOpacity, Modal, TextInput } from 'react-native';
-import imgLogin from 'assets/image4.png';
+import { View, SafeAreaView, StyleSheet, Text, TouchableOpacity, Modal, TextInput, ImageBackground } from 'react-native';
+import imgLogin from '../assets/image4.png'; // Corrected path
+
 export default function LoginScreen({ navigation }) {
   return (
     <View style={styles.container}>
@@ -21,7 +22,6 @@ export default function LoginScreen({ navigation }) {
           <TouchableOpacity style={styles.loginButton}>
             <Text style={styles.loginButtonText}>Iniciar sesión</Text>
           </TouchableOpacity>
-
         </View>
       </ImageBackground>
     </View>
