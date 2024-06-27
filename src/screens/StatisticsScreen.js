@@ -4,7 +4,6 @@ import { View, Text, StyleSheet, SafeAreaView, Image } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import chart1 from '../assets/Chart1.png';
 import chart2 from '../assets/Chart2.png';
-import { MaterialIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
 
 export default function StatisticsScreen() {
   const [selectedValue, setSelectedValue] = React.useState("press_militar");
@@ -24,10 +23,9 @@ export default function StatisticsScreen() {
         </Picker>
       </View>
       <View style={styles.chartContainer}>
-        <Image source={chart1} style={styles.chart1} />
-        <Image source={chart2} style={styles.chart2} />
+        <Image source={chart1} style={styles.chart1} resizeMode="contain" />
+        <Image source={chart2} style={styles.chart2} resizeMode="contain" />
       </View>
-      
     </SafeAreaView>
   );
 }
@@ -35,19 +33,21 @@ export default function StatisticsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'black',
+    backgroundColor: '#242323', // Similar al fondo en la imagen proporcionada
   },
   header: {
-    alignItems: 'center',
-    marginTop: 20,
+    marginTop: 30,
+    marginLeft: 80,
   },
   headerText: {
     fontSize: 24,
     color: 'white',
+    textAlign: 'left',
   },
   pickerContainer: {
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginVertical: 20,
+    marginLeft: 20,
   },
   picker: {
     height: 50,
@@ -60,20 +60,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   chart1: {
-    width: 300,
-    height: 150,
+    flex: 1,
+    width: '90%',
     marginVertical: 20,
   },
   chart2: {
-    width: 300,
-    height: 300,
+    flex: 2,
+    width: '90%',
     marginVertical: 20,
-  },
-  navbar: {
-    height: 60,
-    backgroundColor: 'black',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
   },
 });
