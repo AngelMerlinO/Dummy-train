@@ -7,6 +7,7 @@ import HomeScreen from '../screens/HomeScreen';
 import StatisticsScreen from '../screens/StatisticsScreen';
 import CalendarScreen from '../screens/CalendarScreen';
 import loginScreen from '../screens/LoginScreen';
+import RegisterScreen from '../screens/RegisterScreen';
 import PlanScreen from '../screens/PlanScreen';
 
 import { StatusBar } from 'react-native';
