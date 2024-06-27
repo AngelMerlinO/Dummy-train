@@ -14,16 +14,16 @@ export default function HomeScreen({ navigation }) {
         </TouchableOpacity>
       </View>
       <View style={styles.content}>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Statistics')}>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Plan')}>
           <Text style={styles.buttonText}>Empuje</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Statistics')}>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Plan')}>
           <Text style={styles.buttonText}>Jalón</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Statistics')}>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Plan')}>
           <Text style={styles.buttonText}>Pierna</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Statistics')}>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Plan')}>
           <Text style={styles.buttonText}>Cara</Text>
         </TouchableOpacity>
       </View>
