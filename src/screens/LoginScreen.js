@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, SafeAreaView, StyleSheet, Text, TouchableOpacity, Modal, TextInput, ImageBackground } from 'react-native';
-import imgLogin from '../assets/image4.png'; // Corrected path
+import { View, StyleSheet, Text, TouchableOpacity, TextInput, ImageBackground } from 'react-native';
+import imgLogin from '../assets/image4.png'; 
 
 export default function LoginScreen({ navigation }) {
   return (
@@ -19,8 +19,14 @@ export default function LoginScreen({ navigation }) {
             placeholderTextColor="#999"
             secureTextEntry
           />
-          <TouchableOpacity style={styles.loginButton}>
+          <TouchableOpacity
+            style={styles.loginButton}
+            onPress={() => navigation.navigate('Main')}
+          >
             <Text style={styles.loginButtonText}>Iniciar sesión</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+            <Text style={styles.registerText}>¿No tienes una cuenta? Regístrate</Text>
           </TouchableOpacity>
         </View>
       </ImageBackground>

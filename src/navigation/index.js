@@ -6,11 +6,9 @@ import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/HomeScreen';
 import StatisticsScreen from '../screens/StatisticsScreen';
 import CalendarScreen from '../screens/CalendarScreen';
-import loginScreen from '../screens/LoginScreen';
+import LoginScreen from '../screens/LoginScreen'; // Corrige la importación para seguir la convención de mayúsculas
 import RegisterScreen from '../screens/RegisterScreen';
 import PlanScreen from '../screens/PlanScreen';
-
-import { StatusBar } from 'react-native';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -18,10 +16,7 @@ const Tab = createBottomTabNavigator();
 function HomeStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen
-        name="Home index"
-        component={HomeScreen}
-      />
+      <Stack.Screen name="HomeIndex" component={HomeScreen} />
       <Stack.Screen name="Statistics" component={StatisticsScreen} />
     </Stack.Navigator>
   );
@@ -30,7 +25,7 @@ function HomeStack() {
 function CalendarStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Calendar In" component={CalendarScreen} />
+      <Stack.Screen name="CalendarIn" component={CalendarScreen} />
     </Stack.Navigator>
   );
 }
@@ -43,7 +38,7 @@ function PlanStack() {
   );
 }
 
-export default function Navigation() {
+function MainTabs() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -70,5 +65,15 @@ export default function Navigation() {
       <Tab.Screen name="Calendar" component={CalendarStack} />
       <Tab.Screen name="Plan" component={PlanStack} />
     </Tab.Navigator>
+  );
+}
+
+export default function Navigation() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="Register" component={RegisterScreen} />
+      <Stack.Screen name="Main" component={MainTabs} />
+    </Stack.Navigator>
   );
 }

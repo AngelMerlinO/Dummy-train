@@ -34,7 +34,10 @@ export default function RegisterScreen({ navigation }) {
             placeholderTextColor="#999"
             secureTextEntry
           />
-          <TouchableOpacity style={styles.registerButton}>
+          <TouchableOpacity
+            style={styles.registerButton}
+            onPress={() => navigation.navigate('Login')}
+          >
             <Text style={styles.registerButtonText}>Registrarse</Text>
           </TouchableOpacity>
         </View>
@@ -42,6 +45,7 @@ export default function RegisterScreen({ navigation }) {
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
