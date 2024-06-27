@@ -6,7 +6,9 @@ import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/HomeScreen';
 import StatisticsScreen from '../screens/StatisticsScreen';
 import CalendarScreen from '../screens/CalendarScreen';
+import loginScreen from '../screens/LoginScreen';
 import PlanScreen from '../screens/PlanScreen';
+
 import { StatusBar } from 'react-native';
 
 const Stack = createNativeStackNavigator();
@@ -17,7 +19,7 @@ function HomeStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen
         name="Home index"
-        component={HomeScreen}
+        component={loginScreen}
       />
       <Stack.Screen name="Statistics" component={StatisticsScreen} />
     </Stack.Navigator>
