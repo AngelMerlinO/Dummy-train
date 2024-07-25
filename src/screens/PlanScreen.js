@@ -1,30 +1,143 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Modal, TextInput } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 
-const exercises = [
-  { name: 'Press militar', sets: 10, reps: 8, weight: 15 },
-  { name: 'Press banca', sets: 10, reps: 8, weight: 15 },
-  { name: 'Press inclinado', sets: 10, reps: 8, weight: 15 },
-  { name: 'Mancuernas contra el pecho', sets: 10, reps: 8, weight: 15 },
-  { name: 'Press de banca con agarre cerrado', sets: 10, reps: 8, weight: 15 }
-];
+export default function PlanScreen({ route }) {
+  const { routineId } = route.params || {};
+  if (!routineId) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.content}>
+          <Text>Error: routineId no encontrado.</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
-export default function PlanScreen() {
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
+  const [registerModalVisible, setRegisterModalVisible] = useState(false);
   const [newExercise, setNewExercise] = useState('');
-  const [selectedExercise, setSelectedExercise] = useState({ name: '', sets: '', reps: '', weight: '' });
+  const [selectedExercise, setSelectedExercise] = useState({ id: '', name: '', sets: '', reps: '', weight: '' });
+  const [newRegister, setNewRegister] = useState({ kilogram: '', repetitions: '', series: '' });
+  const [exercises, setExercises] = useState([]);
 
-  const handleAddExercise = () => {
-    exercises.push({ name: newExercise, sets: '', reps: '', weight: '' });
-    setNewExercise('');
-    setAddModalVisible(false);
+  useEffect(() => {
+    fetchExercises();
+  }, [routineId]);
+
+  const fetchExercises = async () => {
+    try {
+      const response = await fetch(`http://98.80.41.243:5005/rutine/${routineId}/exercises`);
+      if (!response.ok) throw new Error('Error fetching exercises');
+      const data = await response.json();
+      const updatedExercises = await Promise.all(data.map(async (exercise) => {
+        try {
+          const registersResponse = await fetch(`http://98.80.41.243:5005/exercise/${exercise.id}/registers`);
+          if (!registersResponse.ok) throw new Error('Error fetching registers');
+          const registersData = await registersResponse.json();
+          const lastRegister = registersData[registersData.length - 1] || {};
+          return {
+            ...exercise,
+            sets: lastRegister.series || 0,
+            reps: lastRegister.repetitions || 0,
+            weight: lastRegister.kilogram || 0
+          };
+        } catch (error) {
+          console.error(error);
+          return { ...exercise, sets: 0, reps: 0, weight: 0 };
+        }
+      }));
+      setExercises(updatedExercises);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const handleEditExercise = () => {
-    // Aquí puedes agregar lógica para editar el ejercicio seleccionado
-    console.log(selectedExercise);
-    setEditModalVisible(false);
+  const handleAddExercise = async () => {
+    if (!newExercise.trim()) {
+      Alert.alert('Error', 'El nombre del ejercicio no puede estar vacío');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://98.80.41.243:5005/exercise', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: newExercise, rutine_id: routineId }),
+      });
+
+      if (response.ok) {
+        const addedExercise = await response.json();
+        setExercises((prevExercises) => [...prevExercises, addedExercise]);
+        setAddModalVisible(false);
+        setNewExercise('');
+      } else {
+        Alert.alert('Error', 'No se pudo agregar el ejercicio');
+      }
+    } catch (error) {
+      console.error('Error adding exercise:', error);
+      Alert.alert('Error', 'No se pudo agregar el ejercicio');
+    }
+  };
+
+  const handleEditExercise = async () => {
+    if (!selectedExercise.name.trim()) {
+      Alert.alert('Error', 'El nombre del ejercicio no puede estar vacío');
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://98.80.41.243:5005/exercise/${selectedExercise.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: selectedExercise.name }),
+      });
+
+      if (response.ok) {
+        const updatedExercises = exercises.map(exercise =>
+          exercise.id === selectedExercise.id ? selectedExercise : exercise
+        );
+        setExercises(updatedExercises);
+        setEditModalVisible(false);
+      } else {
+        Alert.alert('Error', 'No se pudo actualizar el ejercicio');
+      }
+    } catch (error) {
+      console.error('Error updating exercise:', error);
+      Alert.alert('Error', 'No se pudo actualizar el ejercicio');
+    }
+  };
+
+  const handleAddRegister = async () => {
+    if (!newRegister.kilogram || !newRegister.repetitions || !newRegister.series) {
+      Alert.alert('Error', 'Todos los campos deben estar completos');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://98.80.41.243:5005/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ...newRegister, exercise_id: selectedExercise.id }),
+      });
+
+      if (response.ok) {
+        fetchExercises();  // Refrescar los ejercicios para mostrar el nuevo registro
+        setRegisterModalVisible(false);
+        setNewRegister({ kilogram: '', repetitions: '', series: '' });
+      } else {
+        Alert.alert('Error', 'No se pudo agregar el registro');
+      }
+    } catch (error) {
+      console.error('Error adding register:', error);
+      Alert.alert('Error', 'No se pudo agregar el registro');
+    }
   };
 
   return (
@@ -40,7 +153,11 @@ export default function PlanScreen() {
         </View>
         <Text style={styles.title}>Ejercicios</Text>
         {exercises.map((exercise, index) => (
-          <TouchableOpacity key={index} onPress={() => { setSelectedExercise(exercise); setEditModalVisible(true); }}>
+          <TouchableOpacity
+            key={index}
+            onPress={() => { setSelectedExercise(exercise); setRegisterModalVisible(true); }}
+            onLongPress={() => { setSelectedExercise(exercise); setEditModalVisible(true); }}
+          >
             <View style={styles.card}>
               <View style={styles.cardContent}>
                 <Text style={styles.cardTitle}>{exercise.name}</Text>
@@ -62,15 +179,13 @@ export default function PlanScreen() {
         animationType="slide"
         transparent={true}
         visible={addModalVisible}
-        onRequestClose={() => {
-          setAddModalVisible(!addModalVisible);
-        }}
+        onRequestClose={() => setAddModalVisible(false)}
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalView}>
             <TouchableOpacity
               style={styles.closeButton}
-              onPress={() => setAddModalVisible(!addModalVisible)}
+              onPress={() => setAddModalVisible(false)}
             >
               <Text style={styles.closeButtonText}>×</Text>
             </TouchableOpacity>
@@ -96,46 +211,76 @@ export default function PlanScreen() {
         animationType="slide"
         transparent={true}
         visible={editModalVisible}
-        onRequestClose={() => {
-          setEditModalVisible(!editModalVisible);
-        }}
+        onRequestClose={() => setEditModalVisible(false)}
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalView}>
             <TouchableOpacity
               style={styles.closeButton}
-              onPress={() => setEditModalVisible(!editModalVisible)}
+              onPress={() => setEditModalVisible(false)}
             >
               <Text style={styles.closeButtonText}>×</Text>
             </TouchableOpacity>
-            <Text style={styles.modalTitle}>{selectedExercise.name}</Text>
+            <Text style={styles.modalTitle}>Editar Ejercicio</Text>
             <TextInput
               style={styles.input}
-              placeholder="Kg"
+              placeholder="Nombre"
+              placeholderTextColor="#999"
+              value={selectedExercise.name}
+              onChangeText={(text) => setSelectedExercise({ ...selectedExercise, name: text })}
+            />
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={handleEditExercise}
+            >
+              <Text style={styles.saveButtonText}>Guardar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={registerModalVisible}
+        onRequestClose={() => setRegisterModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalView}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setRegisterModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>×</Text>
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>Agregar Registro</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Kilogramos"
               placeholderTextColor="#999"
               keyboardType="numeric"
-              value={selectedExercise.weight.toString()}
-              onChangeText={(text) => setSelectedExercise({ ...selectedExercise, weight: text })}
+              value={newRegister.kilogram}
+              onChangeText={(text) => setNewRegister({ ...newRegister, kilogram: text })}
             />
             <TextInput
               style={styles.input}
               placeholder="Repeticiones"
               placeholderTextColor="#999"
               keyboardType="numeric"
-              value={selectedExercise.reps.toString()}
-              onChangeText={(text) => setSelectedExercise({ ...selectedExercise, reps: text })}
+              value={newRegister.repetitions}
+              onChangeText={(text) => setNewRegister({ ...newRegister, repetitions: text })}
             />
             <TextInput
               style={styles.input}
               placeholder="Series"
               placeholderTextColor="#999"
               keyboardType="numeric"
-              value={selectedExercise.sets.toString()}
-              onChangeText={(text) => setSelectedExercise({ ...selectedExercise, sets: text })}
+              value={newRegister.series}
+              onChangeText={(text) => setNewRegister({ ...newRegister, series: text })}
             />
             <TouchableOpacity
               style={styles.saveButton}
-              onPress={handleEditExercise}
+              onPress={handleAddRegister}
             >
               <Text style={styles.saveButtonText}>Guardar</Text>
             </TouchableOpacity>
@@ -170,7 +315,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   addButton: {
-    backgroundColor: '#A0522D', // Color de fondo del botón de añadir similar al de la imagen
+    backgroundColor: '#A0522D',
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -179,7 +324,7 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     fontSize: 24,
-    color: 'white', // Color del texto del botón de añadir
+    color: 'white',
   },
   card: {
     backgroundColor: '#2a2a2a',
@@ -207,7 +352,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo oscurecido
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalView: {
     width: '80%',

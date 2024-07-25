@@ -31,6 +31,7 @@
     "react-native-screens": "^3.31.1",
     "react-native-svg": "^12.1.1",
     "react-native-svg-charts": "^5.4.0",
+    "react-native-swipeable-list": "^0.1.2",
     "react-native-tailwindcss": "^1.1.11",
     "victory-native": "^41.0.1"
   },

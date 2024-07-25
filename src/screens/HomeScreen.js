@@ -1,9 +1,85 @@
-import React, { useState } from 'react';
-import { View, SafeAreaView, StyleSheet, Text, TouchableOpacity, Modal, TextInput } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, SafeAreaView, StyleSheet, Text, TouchableOpacity, Modal, TextInput, FlatList, Dimensions, Alert } from 'react-native';
 import Constants from 'expo-constants';
+
+const { width } = Dimensions.get('window');
 
 export default function HomeScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
+  const [routines, setRoutines] = useState([]);
+  const [routineName, setRoutineName] = useState('');
+
+  useEffect(() => {
+    const fetchRoutines = async () => {
+      try {
+        const response = await fetch('http://98.80.41.243:5005/rutines');
+        const data = await response.json();
+        setRoutines(data);
+      } catch (error) {
+        console.error('Error fetching routines:', error);
+      }
+    };
+
+    fetchRoutines();
+  }, []);
+
+  const handleSave = async () => {
+    if (!routineName.trim()) {
+      Alert.alert('Error', 'El nombre de la rutina no puede estar vacío');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://98.80.41.243:5005/rutine', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: routineName }),
+      });
+
+      if (response.ok) {
+        const newRoutine = await response.json();
+        setRoutines((prevRoutines) => [...prevRoutines, newRoutine]);
+        setModalVisible(false);
+        setRoutineName('');
+      } else {
+        Alert.alert('Error', 'No se pudo guardar la rutina');
+      }
+    } catch (error) {
+      console.error('Error saving routine:', error);
+      Alert.alert('Error', 'No se pudo guardar la rutina');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(`http://98.80.41.243:5005/rutine/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setRoutines((prevRoutines) => prevRoutines.filter((routine) => routine.id !== id));
+      } else {
+        Alert.alert('Error', 'No se pudo eliminar la rutina');
+      }
+    } catch (error) {
+      console.error('Error deleting routine:', error);
+      Alert.alert('Error', 'No se pudo eliminar la rutina');
+    }
+  };
+
+  const confirmDelete = (id) => {
+    Alert.alert(
+      'Eliminar rutina',
+      '¿Estás seguro de que deseas eliminar esta rutina?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Eliminar', onPress: () => handleDelete(id) },
+      ],
+      { cancelable: true }
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -14,18 +90,20 @@ export default function HomeScreen({ navigation }) {
         </TouchableOpacity>
       </View>
       <View style={styles.content}>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Plan')}>
-          <Text style={styles.buttonText}>Empuje</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Plan')}>
-          <Text style={styles.buttonText}>Jalón</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Plan')}>
-          <Text style={styles.buttonText}>Pierna</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Plan')}>
-          <Text style={styles.buttonText}>Cara</Text>
-        </TouchableOpacity>
+        <FlatList
+          data={routines}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => navigation.navigate('Plan', { routineId: item.id })}
+              onLongPress={() => confirmDelete(item.id)}
+            >
+              <Text style={styles.buttonText}>{item.name}</Text>
+            </TouchableOpacity>
+          )}
+          contentContainerStyle={styles.flatListContent}
+        />
       </View>
 
       <Modal
@@ -40,8 +118,15 @@ export default function HomeScreen({ navigation }) {
               <Text style={styles.closeButtonText}>X</Text>
             </TouchableOpacity>
             <Text style={styles.modalTitle}>Nuevo entrenamiento</Text>
-            <TextInput style={styles.input} placeholder="Nombre" placeholderTextColor="#999" keyboardType="default" />
-            <TouchableOpacity style={styles.saveButton} onPress={() => setModalVisible(false)}>
+            <TextInput
+              style={styles.input}
+              placeholder="Nombre"
+              placeholderTextColor="#999"
+              keyboardType="default"
+              value={routineName}
+              onChangeText={setRoutineName}
+            />
+            <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
               <Text style={styles.saveButtonText}>Guardar</Text>
             </TouchableOpacity>
           </View>
@@ -54,7 +139,7 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#202020', // Color de fondo similar al de la imagen
+    backgroundColor: '#202020',
     paddingTop: Constants.statusBarHeight,
   },
   headerContainer: {
@@ -67,28 +152,39 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: 'white', // Color del texto del encabezado
+    color: 'white',
   },
   content: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 10,
+  },
+  flatListContent: {
+    alignItems: 'center',
+    width: '100%',
   },
   button: {
-    backgroundColor: '#FF7F50', // Color de fondo de los botones similar al de la imagen
+    backgroundColor: '#FF7F50',
     paddingVertical: 15,
     paddingHorizontal: 50,
-    borderRadius: 10,
+    borderRadius: 30,
     marginVertical: 10,
-    width: '80%',
+    width: '90%',
+    maxWidth: 400,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
   },
   buttonText: {
     fontSize: 16,
-    color: 'black', // Color del texto de los botones
+    color: 'black',
   },
   addButton: {
-    backgroundColor: '#A0522D', // Color de fondo del botón de añadir similar al de la imagen
+    backgroundColor: '#A0522D',
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -97,7 +193,7 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     fontSize: 24,
-    color: 'white', // Color del texto del botón de añadir
+    color: 'white',
   },
   modalContainer: {
     flex: 1,

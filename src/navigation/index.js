@@ -1,4 +1,3 @@
-// src/navigation/index.js
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -6,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/HomeScreen';
 import StatisticsScreen from '../screens/StatisticsScreen';
 import CalendarScreen from '../screens/CalendarScreen';
-import LoginScreen from '../screens/LoginScreen'; // Corrige la importación para seguir la convención de mayúsculas
+import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import PlanScreen from '../screens/PlanScreen';
 
@@ -18,6 +17,7 @@ function HomeStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="HomeIndex" component={HomeScreen} />
       <Stack.Screen name="Statistics" component={StatisticsScreen} />
+      <Stack.Screen name="Plan" component={PlanScreen} />
     </Stack.Navigator>
   );
 }
@@ -26,14 +26,6 @@ function CalendarStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="CalendarIn" component={CalendarScreen} />
-    </Stack.Navigator>
-  );
-}
-
-function PlanStack() {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Plan" component={PlanScreen} />
     </Stack.Navigator>
   );
 }
@@ -63,7 +55,7 @@ function MainTabs() {
       <Tab.Screen name="Home" component={HomeStack} />
       <Tab.Screen name="Statistics" component={StatisticsScreen} />
       <Tab.Screen name="Calendar" component={CalendarStack} />
-      <Tab.Screen name="Plan" component={PlanStack} />
+      <Tab.Screen name="Plan" component={PlanScreen} />
     </Tab.Navigator>
   );
 }
